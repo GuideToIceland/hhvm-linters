@@ -18,44 +18,42 @@ use namespace HH\Lib\Str;
 final class TabbedIndentLinter extends AutoFixingLineLinter<FixableLineLintError>
 {
 	<<__Override>>
-	public function getLintErrors(): Traversable<FixableLineLintError>
+	public function getLintErrorsForLine(string $line, int $ln): Traversable<FixableLineLintError>
 	{
-		$lines = $this->getLinesFromFile();
 		$errs = vec[];
-		foreach ($lines as $ln => $line)
+		for($i = 0; $i < strlen($line); $i++)
 		{
-			for($i = 0; $i < strlen($line); $i++)
+			$char = $line[$i];
+
+			//Fix for dockblocks...
 			{
-				$char = $line[$i];
-
-				//Fix for dockblocks...
+				$nextChar = (($i + 1) < strlen($line))?$line[$i+1]:null;
+				if($char === ' ' && $nextChar && $nextChar === '*')
 				{
-					$nextChar = (($i + 1) < strlen($line))?$line[$i+1]:null;
-					if($char === ' ' && $nextChar && $nextChar === '*')
-					{
-						break;
-					}
-				}
-
-				if($char === "\t")
-				{
-					continue;
-				}
-
-				if(Str\contains(" \r", $char))
-				{
-					$errs[] = new FixableLineLintError(
-						$this,
-						'Lines must be indented by tabs',
-						tuple($ln + 1, $i + 1),
-					);
 					break;
 				}
+			}
+
+			if($char === "\t")
+			{
+				continue;
+			}
+
+			if(Str\contains(" \r", $char))
+			{
+				$errs[] = new FixableLineLintError(
+					$this,
+					'Lines must be indented by tabs',
+					tuple($ln + 1, $i + 1),
+				);
 				break;
 			}
+			break;
 		}
 		return $errs;
 	}
+
+
 
 	<<__Override>>
 	public function getFixedLine(string $line): string {
