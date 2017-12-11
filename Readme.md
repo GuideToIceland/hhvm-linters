@@ -1,4 +1,4 @@
-# Linter for use in haclkang projects
+# Linter for use in Hacklang projects
 
 ## Setup
 
